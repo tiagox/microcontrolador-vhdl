@@ -2,10 +2,13 @@ GHDL=ghdl
 GHDLFLAGS=
 MODULES=\
 	alu.o \
-	alu_tb
+	alu_tb \
+	rom_prog.o \
+	rom_prog_tb
 
 test: $(MODULES)
 	./alu_tb --vcd=alu_tb.vcd
+	./rom_prog_tb --vcd=rom_prog_tb.vcd
 
 # Binary depends on the object file
 %: %.o
@@ -17,4 +20,4 @@ test: $(MODULES)
 
 clean:
 	@echo "Cleaning up..."
-	rm -fv *.o  work*.cf *.vcd alu alu_tb
+	rm -fv *.o  work*.cf *.vcd alu_tb rom_prog_tb
