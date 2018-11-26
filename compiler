@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+
+from sys import stdin, stdout, stderr, argv
+from re import compile
+
+
+def abort_compilation(message):
+    stderr.write('%s\n\n' % message)
+    stderr.write('Aborting compilation.\n')
+    quit(1)
+
+
+def parse_rd(line, args):
+    if len(args) != 1:
+        abort_compilation('line %d: wrong argument list; <rd> expected; <%s> given.' %
+                          (line + 1, ', '.join(args)))
+    return format(int(args[0], 0), '04b') + '0000'
+
+
+def parse_rs(line, args):
+    if len(args) != 1:
+        abort_compilation('line %d: wrong argument list; <rs> expected; <%s> given.' %
+                          (line + 1, ', '.join(args)))
+    return '0000' + format(int(args[0], 0), '04b')
+
+
+def parse_rd_rs(line, args):
+    if len(args) != 2:
+        abort_compilation('line %d: wrong argument list; <rd, rs> expected; <%s> given.' %
+                          (line + 1, ', '.join(args)))
+    return format(int(args[0], 0), '04b') + format(int(args[1], 0), '04b')
+
+
+def parse_immediate(line, args):
+    if len(args) != 1:
+        abort_compilation('line %d: wrong argument list; <immediate> expected; <%s> given.' %
+                          (line + 1, ', '.join(args)))
+    return format(int(args[0], 0), '08b')
+
+
+def get_codified_instruction(line, instruction, args):
+    try:
+        config = instructions_config[instruction]
+    except KeyError:
+        abort_compilation('line %d: %s is not a valid instruction.' %
+                          (line + 1, instruction))
+    else:
+        return config['code'] + config['args_parser'](line, args)
+
+
+instructions_config = {
+    'IN':  {'code': '00000001', 'code_hex': '0x01', 'args_parser': parse_rd},
+    'OUT': {'code': '00000010', 'code_hex': '0x02', 'args_parser': parse_rs},
+    'MOV': {'code': '00000011', 'code_hex': '0x03', 'args_parser': parse_rd_rs},
+    'LDA': {'code': '00000100', 'code_hex': '0x04', 'args_parser': parse_rs},
+    'LDI': {'code': '00000101', 'code_hex': '0x05', 'args_parser': parse_immediate},
+    'ADD': {'code': '00010000', 'code_hex': '0x10', 'args_parser': parse_rd_rs},
+    'SUB': {'code': '00010001', 'code_hex': '0x11', 'args_parser': parse_rd_rs},
+    'AND': {'code': '00010010', 'code_hex': '0x12', 'args_parser': parse_rd_rs},
+    'OR':  {'code': '00010011', 'code_hex': '0x13', 'args_parser': parse_rd_rs},
+    'XOR': {'code': '00010100', 'code_hex': '0x14', 'args_parser': parse_rd_rs},
+    'SHL': {'code': '00100000', 'code_hex': '0x20', 'args_parser': parse_rd_rs},
+    'SHR': {'code': '00100001', 'code_hex': '0x21', 'args_parser': parse_rd_rs},
+}
+
+input_file = open(argv[-1], 'r') if len(argv) > 1 else stdin
+separators = compile(r'\s+|,\s*')
+
+line_no = 1
+addr = 0
+codified_intructions = []
+for line in input_file:
+    instruction, *args = separators.split(line.strip())
+    codified_intructions.append((
+        format(addr, '07b'),
+        get_codified_instruction(line_no, instruction, args),
+        line.strip()
+    ))
+    line_no += 1
+    addr += 1
+
+
+input_file.close()
+
+
+output = '''library ieee;
+use ieee.std_logic_1164.all;
+
+entity rom_prog is
+\tport (
+\t\taddr   : in  std_logic_vector(6 downto 0);
+\t\toutput : out std_logic_vector(15 downto 0)
+\t);
+end rom_prog;
+
+architecture rom_prog_beh of rom_prog is
+begin
+
+\tprocess (addr)
+\tbegin
+\t\tcase addr is
+'''
+
+for addr, code, instruction in codified_intructions:
+    output += '\t\t\twhen "%s" => output <= "%s"; -- %s\n' % (
+        addr, code, instruction)
+
+output += '''\t\t\twhen others => output <= (others => '0');
+\t\tend case;
+\tend process;
+
+end rom_prog_beh;
+'''
+
+stdout.write(output)
