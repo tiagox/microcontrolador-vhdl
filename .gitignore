@@ -6,3 +6,4 @@
 
 alu_tb
 rom_prog_tb
+decode_tb

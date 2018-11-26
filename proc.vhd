@@ -49,7 +49,7 @@ architecture beh_proc of proc is
 
 	component decode
 		port (
-			input    : in  std_logic_vector(8 downto 0);
+			input    : in  std_logic_vector(7 downto 0);
 			reg_we   : out std_logic;
 			out_we   : out std_logic;
 			reg_a_we : out std_logic;
