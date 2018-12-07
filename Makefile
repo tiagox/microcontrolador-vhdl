@@ -6,12 +6,15 @@ MODULES=\
 	rom_prog.o \
 	rom_prog_tb \
 	decode.o \
-	decode_tb
+	decode_tb \
+	regs.o \
+	regs_tb
 
 test: $(MODULES)
 	./alu_tb --vcd=alu_tb.vcd
 	./rom_prog_tb --vcd=rom_prog_tb.vcd
 	./decode_tb --vcd=decode_tb.vcd
+	./regs_tb --vcd=regs_tb.vcd
 
 # Binary depends on the object file
 %: %.o
@@ -23,4 +26,4 @@ test: $(MODULES)
 
 clean:
 	@echo "Cleaning up..."
-	rm -fv *.o  work*.cf *.vcd alu_tb rom_prog_tb decode_tb
+	rm -fv *.o  work*.cf *.vcd alu_tb rom_prog_tb decode_tb regs_tb
