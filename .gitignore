@@ -6,5 +6,6 @@
 
 alu_tb
 decode_tb
+proc_tb
 rom_prog_tb
 regs_tb
