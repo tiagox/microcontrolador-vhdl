@@ -15,7 +15,7 @@ architecture regs_beh of regs is
 
 	constant REG_TAM : integer := 16;
 	type mem is array(REG_TAM-1 downto 0) of std_logic_vector(7 downto 0);
-	signal reg : mem;
+	signal registers : mem;
 
 begin
 
@@ -23,14 +23,14 @@ begin
 	begin
 		if reset = '1' then
 			for i in 0 to REG_TAM - 1 loop
-				reg(i) <= (others => '0');
+				registers(i) <= (others => '0');
 			end loop;
 		elsif (rising_edge(clk) and we = '1') then
-			--report to_string(rd) & ':' & to_string(conv_integer(rd));
-			reg(conv_integer(rd)) <= din;
+			-- report to_string(rd) & ':' & to_string(conv_integer(rd));
+			registers(conv_integer(rd)) <= din;
 		end if;
 	end process;
 
-	dout <= reg(conv_integer(rs));
+	dout <= registers(conv_integer(rs));
 
 end regs_beh;

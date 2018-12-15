@@ -31,9 +31,9 @@ begin
 
 	process
 	begin
-		rs <= "0111";
-		rd <= "0101";
-		din   <= "01011010";
+		rs  <= "0111";
+		rd  <= "0101";
+		din <= "01011010";
 		wait for 10 ns;
 		assert (dout = "UUUUUUUU") report "The initialization failed." severity ERROR;
 
