@@ -3,7 +3,9 @@
 *.o
 *.cf
 *.vcd
+*.ghw
 
+# Generated binaries.
 alu_tb
 decode_tb
 proc_tb
