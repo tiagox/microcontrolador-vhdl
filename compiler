@@ -70,6 +70,8 @@ line_no = 1
 addr = 0
 codified_intructions = []
 for line in input_file:
+    if line.strip() == '':
+        continue
     instruction, *args = separators.split(line.strip())
     codified_intructions.append((
         format(addr, '07b'),
